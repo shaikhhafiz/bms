@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Author } from '../../authors/entities/author.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity('books')
 export class Book {
@@ -27,10 +28,12 @@ export class Book {
   @ApiProperty({ description: 'Author of the book', type: () => Author })
   @ManyToOne(() => Author, author => author.books, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'authorId' })
+  @IsNotEmpty({ message: 'Author is required' })
   author: Author;
 
   @ApiProperty({ description: 'Author ID', example: '123e4567-e89b-12d3-a456-426614174000' })
   @Column()
+  @IsNotEmpty({ message: 'Author ID is required' })
   authorId: string;
 
   @ApiProperty({ description: 'Date when the book was created', example: '2023-06-21T12:00:00Z' })

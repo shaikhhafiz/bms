@@ -9,6 +9,7 @@ import { AuthorsController } from './authors/authors.controller';
 import { BooksController } from './books/books.controller';
 import { AuthorsService } from './authors/authors.service';
 import { BooksService } from './books/books.service';
+import { IsbnUniqueConstraint } from './common/validators/isbn-unique.validator';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { BooksService } from './books/books.service';
     TypeOrmModule.forFeature([Author, Book]),
   ],
   controllers: [AppController, AuthorsController, BooksController],
-  providers: [AppService, AuthorsService, BooksService],
+  providers: [AppService, AuthorsService, BooksService, IsbnUniqueConstraint],
 })
 export class AppModule {}

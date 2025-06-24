@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindOptionsWhere } from 'typeorm';
 import { Author } from './entities/author.entity';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
+import { EntityNotFoundException } from '../common/exceptions/not-found.exception';
 
 @Injectable()
 export class AuthorsService {
@@ -40,7 +41,7 @@ export class AuthorsService {
     });
 
     if (!author) {
-      throw new NotFoundException(`Author with ID ${id} not found`);
+      throw new EntityNotFoundException('Author', id);
     }
 
     return author;
@@ -58,7 +59,7 @@ export class AuthorsService {
     const result = await this.authorsRepository.delete(id);
 
     if (result.affected === 0) {
-      throw new NotFoundException(`Author with ID ${id} not found`);
+      throw new EntityNotFoundException('Author', id);
     }
   }
 }

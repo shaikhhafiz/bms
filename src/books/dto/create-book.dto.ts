@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsDateString, IsUUID, IsISBN } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsbnUnique } from '../../common/validators/isbn-unique.validator';
 
 export class CreateBookDto {
   @ApiProperty({ description: 'Title of the book', example: 'The Great Novel' })
@@ -10,6 +11,7 @@ export class CreateBookDto {
   @ApiProperty({ description: 'ISBN of the book', example: '978-3-16-148410-0' })
   @IsNotEmpty()
   @IsISBN()
+  @IsbnUnique({ message: 'ISBN must be unique' })
   isbn: string;
 
   @ApiProperty({ description: 'Publication date of the book', required: false, example: '2023-01-01' })
@@ -23,7 +25,7 @@ export class CreateBookDto {
   genre?: string;
 
   @ApiProperty({ description: 'ID of the author', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @IsNotEmpty()
-  @IsUUID()
+  @IsNotEmpty({ message: 'Author is required' })
+  @IsUUID('all', { message: 'Author ID must be a valid UUID' })
   authorId: string;
 }

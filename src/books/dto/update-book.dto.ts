@@ -24,6 +24,6 @@ export class UpdateBookDto {
 
   @ApiProperty({ description: 'ID of the author', required: false, example: '123e4567-e89b-12d3-a456-426614174000' })
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all', { message: 'Author ID must be a valid UUID' })
   authorId?: string;
 }
