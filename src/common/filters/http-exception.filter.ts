@@ -1,9 +1,11 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -21,6 +23,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
       if (typeof exceptionResponse === 'object') {
         message = exceptionResponse.message || exception.message;
         error = exceptionResponse.error || 'Error';
+
+        // Special handling for BadRequestException
+        if (status === HttpStatus.BAD_REQUEST) {
+          error = 'Bad Request';
+
+          // If message is an array, format it nicely
+          if (Array.isArray(message)) {
+            message = message.join(', ');
+          }
+
+          // Handle specific case for non-existent author
+          if (typeof message === 'string' && message.includes('Author with ID')) {
+            message = 'The specified author does not exist';
+          }
+        }
       } else {
         message = exceptionResponse || exception.message;
       }
@@ -46,6 +63,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
         error = 'Database Error';
         message = 'An error occurred while processing your request';
       }
+    }
+
+    // Log the exception details AFTER we've determined the status and message
+    this.logger.error(
+      `Exception: ${request.method} ${request.url} - Status: ${status} - Message: ${message}`,
+      exception instanceof Error ? exception.stack : 'No stack trace available',
+    );
+
+    // For 500 errors, log additional details to help with debugging
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      console.error('INTERNAL SERVER ERROR:', exception);
     }
 
     response.status(status).json({

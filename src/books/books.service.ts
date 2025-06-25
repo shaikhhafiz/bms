@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, QueryFailedError } from 'typeorm';
 import { Book } from './entities/book.entity';
@@ -24,7 +24,7 @@ export class BooksService {
     });
 
     if (!author) {
-      throw new EntityNotFoundException('Author', createBookDto.authorId);
+      throw new BadRequestException(`The specified author does not exist`);
     }
 
     // Check if a book with the same ISBN already exists
@@ -101,7 +101,7 @@ export class BooksService {
       });
 
       if (!author) {
-        throw new EntityNotFoundException('Author', updateBookDto.authorId);
+        throw new BadRequestException(`The specified author does not exist`);
       }
     }
 
