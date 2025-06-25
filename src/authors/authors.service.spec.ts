@@ -2,23 +2,30 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthorsService } from './authors.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Author } from './entities/author.entity';
-import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { EntityNotFoundException } from '../common/exceptions/not-found.exception';
 
-type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+// Define a more specific mock repository type with required methods
+type MockRepository<T = any> = {
+  find: jest.Mock;
+  findOne: jest.Mock;
+  findAndCount: jest.Mock;
+  create: jest.Mock;
+  save: jest.Mock;
+  delete: jest.Mock;
+};
 
-const createMockRepository = <T>(): MockRepository<T> => ({
+const createMockRepository = (): MockRepository => ({
   find: jest.fn(),
   findOne: jest.fn(),
+  findAndCount: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
-  findAndCount: jest.fn(),
 });
 
 describe('AuthorsService', () => {
   let service: AuthorsService;
-  let repository: MockRepository<Author>;
+  let repository: MockRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -114,7 +121,7 @@ describe('AuthorsService', () => {
     it('should throw NotFoundException if author not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non-existent-id')).rejects.toThrow(EntityNotFoundException);
     });
   });
 
@@ -165,7 +172,7 @@ describe('AuthorsService', () => {
     it('should throw NotFoundException if author not found during deletion', async () => {
       repository.delete.mockResolvedValue({ affected: 0 });
 
-      await expect(service.remove('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('non-existent-id')).rejects.toThrow(EntityNotFoundException);
     });
   });
 });
